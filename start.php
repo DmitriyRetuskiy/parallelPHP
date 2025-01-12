@@ -1,23 +1,46 @@
 <?php
+// Async PHP runner by proc_open
+
+function myFunctin($val) {
+    foreach(range(1,$val) as $value) {
+       echo $value;
+    }
+}
+
+class Async {
+
+    // присвоить функции имя
+    public function run($func) {
+        //'nam' $func();
+    }
+
+    public function mtGetReflection()
+    {
+        $reflection = new ReflectionFunction('myFunctin');
+        $file = $reflection->getFileName();
+        $line = $reflection->getStartLine();
+        $code = file($file);
+        $functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
+    }
+
+}
+
+$Async = new Async();
+$Async->run(function(){
+    echo 'hi';
+});
 
 
-//function myFunctin() {
-//    echo 'hi';
-//}
-//$reflection = new ReflectionFunction('myFunctin');
-//$file = $reflection->getFileName();
-//$line = $reflection->getStartLine();
-//$code = file($file);
-//$functionCode = implode("", array_slice($code, $line - 1, $reflection->getEndLine() - $line + 1));
-//echo $file;
-//echo $functionCode;
 
-//function go() {
-//    echo 'go';
-//}
-//
-//$echo="echo 'hi';";
+$reflection = new ReflectionFunction('myFunctin');
+$file = $reflection->getFileName();
+$line = $reflection->getStartLine();
+$code = file($file);
+$functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
 
+echo $functionCode;
+
+die;
 
 $function1 = '\'
     for($i=1;$i<12;$i++) {
@@ -35,6 +58,7 @@ $function1 = '\'
 $function2 = '\'
     for($i=1;$i<20;$i++) {
         sleep(1);
+        echo $a[3];
         file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
     }
     print("success2 \n");
@@ -76,14 +100,19 @@ while(true)
 
     foreach ($process as $key=>$proces) {
 
-        $piepe = $pipes[$key][1];
-        while(!feof($piepe)) {
-            $line = fgets($piepe);
+        $piep = $pipes[$key][1];
+        while(!feof($piep)) {
+            $line = fgets($piep);
             echo $line;
         }
+
         $errors = $pipes[$key][2];
-        while(!feof($piepe)) {
-            $line = fgets($piepe);
+
+        while(!feof($errors)) {
+            $line = fgets($errors);
+//            $line = trim($line);
+//            $line = str_replace("\n","",$line);
+//            if($line == '') $line = 'haven\'t errors';
             echo $line;
         }
 
