@@ -22,6 +22,7 @@ class Async {
         $line = $reflection->getStartLine();
         $code = file($file);
         $functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
+        $functionCode = str_replace("'","\\'",$functionCode);
         return "'$functionCode'";
     }
 
@@ -106,7 +107,6 @@ $Async->add(function() {
 
 $Async->add(function () {
 
-    file_put_contents("file2.txt","");
     for($i=1;$i<20;$i++) {
         sleep(1);
         file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
@@ -116,8 +116,10 @@ $Async->add(function () {
 
 });
 
+// problem with comments into functions
 //$Async->showFunctions();
 
+// problems with quotes '
 $Async->run();
 
 die;
