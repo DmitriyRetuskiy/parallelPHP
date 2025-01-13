@@ -1,35 +1,4 @@
 <?php
-// Async PHP runner by proc_open
-
-function myFunctin($val) {
-    foreach(range(1,$val) as $value) {
-       echo $value;
-    }
-}
-
-class Async {
-
-    // присвоить функции имя
-    public function run($func) {
-        //'nam' $func();
-    }
-
-    public function mtGetReflection()
-    {
-        $reflection = new ReflectionFunction('myFunctin');
-        $file = $reflection->getFileName();
-        $line = $reflection->getStartLine();
-        $code = file($file);
-        $functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
-    }
-
-}
-
-$Async = new Async();
-$Async->run(function(){
-    echo 'hi';
-});
-
 
 
 $reflection = new ReflectionFunction('myFunctin');
