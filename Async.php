@@ -44,7 +44,6 @@ class Async {
 
         while(true)
         {
-            //sleep(1);
 
             foreach ($process as $key=>$proces) {
                 if (!proc_get_status($proces)['running']) {
@@ -89,11 +88,16 @@ class Async {
         }
     }
 
+    /**
+     * for wrapper use brake string by '   php -r 'echo '\''Hello, World!'\'';'
+     * @param string|null $str
+     * @return array|string|string[]|null
+     */
     function wrapeSingleQuotes(?string $str) {
         $pattern = "/'([^']*)'/";  // Регулярное выражение для поиска текста в двойных кавычках
 
         $modifiedString = preg_replace_callback($pattern, function($matches) {
-            return '"' . $matches[0] . '"';  // Оборачиваем найденный текст в дополнительные кавычки
+            return "'\\'" . $matches[0] . "\\''";  // Оборачиваем найденный текст в дополнительные кавычки
         }, $str);
 
         return $modifiedString;
@@ -131,23 +135,39 @@ $Async = new Async();
 $Async->add(function() {
 
     try {
-        $dbh = new PDO("mysql:host=127.0.0.1;dbname=laravel","root", "asdfasdf");
+        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
     } catch (PDOException $e) {
-    // Обрабатываем ошибку подключения
-        echo 'Ошибка подключения: ' . $e->getMessage();
+        echo 'Connection error: ' . $e->getMessage();
     }
 
-// use the connection here
     $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
     while($row = $result->fetch()){
         echo $row["name"] . "\n";
+        file_put_contents('pdo1.txt',$row["name"],FILE_APPEND);
+    }
+
+    $dbh=null;
+});
+
+$Async->add(function() {
+
+    try {
+        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
+    } catch (PDOException $e) {
+        echo 'Connection error: ' . $e->getMessage();
+    }
+
+    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
+    while($row = $result->fetch()){
+        echo $row["name"] . "\n";
+        file_put_contents('pdo2.txt',$row["name"],FILE_APPEND);
     }
 
     $dbh=null;
 });
 
 // problem with comments into functions
-//$Async->showFunctions();
+$Async->showFunctions();
 
 // problems with quotes '
 $Async->run();
