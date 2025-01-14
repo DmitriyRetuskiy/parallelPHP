@@ -1,1 +1,1 @@
-Use proc_open for build Asyc php runners by php -r command
+Use proc_open for build Async php runners by php -r command
