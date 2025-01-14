@@ -22,7 +22,8 @@ class Async {
         $line = $reflection->getStartLine();
         $code = file($file);
         $functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
-        $functionCode = str_replace("'","\\'",$functionCode);
+        //$functionCode = str_replace("'","\\'",$functionCode);
+        $functionCode = $this->wrapeSingleQuotes($functionCode);
         return "'$functionCode'";
     }
 
@@ -88,6 +89,16 @@ class Async {
         }
     }
 
+    function wrapeSingleQuotes(?string $str) {
+        $pattern = "/'([^']*)'/";  // Регулярное выражение для поиска текста в двойных кавычках
+
+        $modifiedString = preg_replace_callback($pattern, function($matches) {
+            return '"' . $matches[0] . '"';  // Оборачиваем найденный текст в дополнительные кавычки
+        }, $str);
+
+        return $modifiedString;
+    }
+
 
 }
 
@@ -95,25 +106,44 @@ class Async {
 
 $Async = new Async();
 
+//$Async->add(function() {
+//
+//    for($i=1;$i<12;$i++) {
+//        sleep(1);
+//        print("work1");
+//        file_put_contents('file1.txt',"$i",FILE_APPEND);
+//    }
+//    print("success1 \n");
+//
+//});
+//
+//$Async->add(function () {
+//
+//    for($i=1;$i<20;$i++) {
+//        sleep(1);
+//        file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
+//    }
+//    print("success2 \n");
+//    die;
+//
+//});
+
 $Async->add(function() {
 
-    for($i=1;$i<12;$i++) {
-        sleep(1);
-        print("work1");
+    try {
+        $dbh = new PDO("mysql:host=127.0.0.1;dbname=laravel","root", "asdfasdf");
+    } catch (PDOException $e) {
+    // Обрабатываем ошибку подключения
+        echo 'Ошибка подключения: ' . $e->getMessage();
     }
-    print("success1 \n");
 
-});
-
-$Async->add(function () {
-
-    for($i=1;$i<20;$i++) {
-        sleep(1);
-        file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
+// use the connection here
+    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
+    while($row = $result->fetch()){
+        echo $row["name"] . "\n";
     }
-    print("success2 \n");
-    die;
 
+    $dbh=null;
 });
 
 // problem with comments into functions
