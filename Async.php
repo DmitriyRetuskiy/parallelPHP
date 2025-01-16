@@ -1,11 +1,17 @@
 <?php
+/*
+ *  Данный код не является действующим
+ *  производственным решением или решением для реального проекта.
+ *  Но идея обертки методов из рефлексии в процессы может быть использована
+ *  для выполнения непоследовательных вычислений.
+ */
 
 // Async PHP runner by proc_open
 class Async {
 
     public $functions = [];
 
-    // присвоить функции имя
+    // adding function into array
     public function add($func):void {
         // get function code
         $funcCode = $this->getFunctionCode($func);
@@ -110,27 +116,27 @@ class Async {
 
 $Async = new Async();
 
-//$Async->add(function() {
-//
-//    for($i=1;$i<12;$i++) {
-//        sleep(1);
-//        print("work1");
-//        file_put_contents('file1.txt',"$i",FILE_APPEND);
-//    }
-//    print("success1 \n");
-//
-//});
-//
-//$Async->add(function () {
-//
-//    for($i=1;$i<20;$i++) {
-//        sleep(1);
-//        file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
-//    }
-//    print("success2 \n");
-//    die;
-//
-//});
+$Async->add(function() {
+
+    for($i=1;$i<12;$i++) {
+        sleep(1);
+        print("work1");
+        file_put_contents('file1.txt',"$i",FILE_APPEND);
+    }
+    print("success1 \n");
+
+});
+
+$Async->add(function () {
+
+    for($i=1;$i<20;$i++) {
+        sleep(1);
+        file_put_contents("file2.txt",$i . "\n",FILE_APPEND);
+    }
+    print("success2 \n");
+    die;
+
+});
 
 $Async->add(function() {
 
