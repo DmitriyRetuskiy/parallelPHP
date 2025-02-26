@@ -12,23 +12,31 @@ class Async {
     public $functions = [];
 
     // adding function into array
-    public function add($func):void {
+    public function add(callable $func):void {
         // get function code
         $funcCode = $this->getFunctionCode($func);
         // add function code to array
         $this->functions[] = $funcCode;
         // start runner
+
     }
 
+
     // get function code
-    public function getFunctionCode($func):string
+    public function getFunctionCode(callable $func):string
     {
         $reflection = new ReflectionFunction($func);
         $file = $reflection->getFileName();
         $line = $reflection->getStartLine();
+        $parameters = $reflection->getStaticVariables(); // get parameters
         $code = file($file);
         $functionCode = implode("", array_slice($code, $line, $reflection->getEndLine() - $line - 1));
-        //$functionCode = str_replace("'","\\'",$functionCode);
+        if (!empty($parameters)) {
+            $str= json_encode($parameters,JSON_UNESCAPED_UNICODE);
+            $strWithArr = "\n     extract(json_decode('$str',1));"; // add parameters in sting function
+            $functionCode = $strWithArr . $functionCode;
+        }
+
         $functionCode = $this->wrapeSingleQuotes($functionCode);
         return "'$functionCode'";
     }
@@ -67,6 +75,7 @@ class Async {
             foreach ($process as $key=>$proces) {
 
                 $piep = $pipes[$key][1];
+
                 while(!feof($piep)) {
                     $line = fgets($piep);
                     echo $line;
@@ -101,7 +110,6 @@ class Async {
      */
     function wrapeSingleQuotes(?string $str) {
         $pattern = "/'([^']*)'/";  // Регулярное выражение для поиска текста в двойных кавычках
-
         $modifiedString = preg_replace_callback($pattern, function($matches) {
             return "'\\'" . $matches[0] . "\\''";  // Оборачиваем найденный текст в дополнительные кавычки
         }, $str);
@@ -115,14 +123,19 @@ class Async {
 // example in use
 
 $Async = new Async();
+$i = 10;
+$Async->add(function() use ($i) {
 
-$Async->add(function() {
-
-    for($i=1;$i<12;$i++) {
+     $stdout = fopen('php://stdout','w');
+     while($i < 12) {
         sleep(1);
-        print("work1");
+        echo "work1";
+//        fwrite($stdout,'work1'."\n"); all out will be into stdout
         file_put_contents('file1.txt',"$i",FILE_APPEND);
-    }
+      $i++;
+     }
+
+    fclose($stdout);
     print("success1 \n");
 
 });
@@ -138,43 +151,43 @@ $Async->add(function () {
 
 });
 
-$Async->add(function() {
+//$Async->add(function() {
+//
+//    try {
+//        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
+//    } catch (PDOException $e) {
+//        echo 'Connection error: ' . $e->getMessage();
+//    }
+//
+//    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
+//    while($row = $result->fetch()){
+//        echo $row["name"] . "\n";
+//        file_put_contents('pdo1.txt',$row["name"],FILE_APPEND);
+//    }
+//
+//    $dbh=null;
+//});
 
-    try {
-        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
-    } catch (PDOException $e) {
-        echo 'Connection error: ' . $e->getMessage();
-    }
+//$Async->add(function() {
+//
+//    try {
+//        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
+//    } catch (PDOException $e) {
+//        echo 'Connection error: ' . $e->getMessage();
+//    }
+//
+//    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
+//    while($row = $result->fetch()){
+//        echo $row["name"] . "\n";
+//        file_put_contents('pdo2.txt',$row["name"],FILE_APPEND);
+//    }
+//
+//    $dbh=null;
+//});
 
-    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
-    while($row = $result->fetch()){
-        echo $row["name"] . "\n";
-        file_put_contents('pdo1.txt',$row["name"],FILE_APPEND);
-    }
-
-    $dbh=null;
-});
-
-$Async->add(function() {
-
-    try {
-        $dbh = new PDO('mysql:host=127.0.0.1;dbname=laravel',"root", "asdfasdf");
-    } catch (PDOException $e) {
-        echo 'Connection error: ' . $e->getMessage();
-    }
-
-    $result = $dbh->query("SELECT users.name FROM users WHERE id>1 AND id<40");
-    while($row = $result->fetch()){
-        echo $row["name"] . "\n";
-        file_put_contents('pdo2.txt',$row["name"],FILE_APPEND);
-    }
-
-    $dbh=null;
-});
 
 // problem with comments into functions
 $Async->showFunctions();
-
 // problems with quotes '
 $Async->run();
 
